@@ -1,29 +1,44 @@
 # AssistContract
 
-Plataforma web experimental para preparar borradores de acuerdos de asistencia personal y servicios domésticos mediante un formulario dinámico.
+Plataforma web para la elaboración guiada de **borradores orientativos** de acuerdos de asistencia personal, servicios domésticos y colaboraciones profesionales, con un formulario modular y contextual.
+
+**Autor del proyecto:** Alejandro Hernández Castillo.
+
+## Funcionalidad MVP
+
+- Asistente de cinco etapas y diseño adaptable para móviles.
+- Clasificación inicial entre empleo doméstico y prestación verdaderamente autónoma.
+- Selección inteligente de actividades, comprobación básica de campos y resumen.
+- Exportación local de borrador `.txt` sin almacenar datos personales en un servidor.
+- Interfaz en español, sin rastreadores ni claves de API.
 
 ## Ejecutar
 
 ```bash
 npm install
 npm run dev
+```
+
+## Compilar
+
+```bash
 npm run build
 ```
 
-## Funcionalidades
+El sitio compilado se encuentra en `dist/` y puede publicarse como aplicación estática. No existe backend ni autenticación en este MVP.
 
-- Formulario progresivo de cinco pasos.
-- Distinción entre empleo doméstico y prestación profesional autónoma.
-- Selección modular de actividades.
-- Validación básica de campos y exportación de borrador TXT.
-- Interfaz responsive, sin envío de datos a servidores.
+## Próximas fases
 
-## Advertencia jurídica
+1. Motor de reglas jurídicas versionado, jurisdicciones y alertas de incompatibilidad.
+2. Catálogo validado de cláusulas y exportación PDF/DOCX.
+3. Revisión humana antes de firma; integración de proveedor de firma electrónica.
+4. Backend con autenticación, control de acceso, cifrado, registros de auditoría y política de retención.
+5. Tests automatizados (unitarios, accesibilidad, E2E, seguridad) y revisión jurídica profesional.
 
-No es un generador de contratos legalmente completos ni aptos para firma. En España, las relaciones laborales del servicio del hogar familiar requieren observar su normativa especial y demás disposiciones aplicables. La naturaleza de la relación depende de los hechos, no de la etiqueta escogida. No utilizar para imponer restricciones de libertad, retener documentos o eludir derechos laborales.
+## Importante
 
-## Próximas etapas
+La contratación laboral del hogar, la asistencia personal y los servicios autónomos tienen requisitos diferentes. El tipo de contrato lo determinan las circunstancias reales. Este MVP no genera contratos jurídicamente completos y no sustituye asesoramiento profesional. Ninguna cláusula debe suprimir derechos laborales, justificar coacción, retención de documentos o limitaciones de libertad.
 
-Motor de reglas por jurisdicción, controles de protección de datos, tests, generación de documentos revisados y firma electrónica.
+## Licencia
 
-Autoría del proyecto: Alejandro Hernández Castillo.
+Todos los derechos reservados por ahora. No se otorga licencia de explotación ni de redistribución del código sin autorización escrita del titular de derechos. Un repositorio público permite examinar su código, pero no implica que sea software de código abierto.

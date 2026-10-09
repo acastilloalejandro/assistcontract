@@ -1,0 +1,27 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {newDraft,normalize,updateDraft,validateStep,validateAll,evaluateRules,completeness,importDraft,visibleFields,SCHEMA} from '../src/engine.js';
+import {asJSON,asHTML,asText,renderDocument} from '../src/documents.js';
+function valid(){const x=newDraft();Object.assign(x.data,{employer:'Ana',worker:'Luis',city:'Barcelona',services:['limpieza'],weeklyHours:'30',startDate:'2026-10-10',schedule:'Lunes a viernes',rest:'Sábado y domingo',grossPay:'1300',payPeriod:'mes',payment:'Transferencia',workplace:'Barcelona'});return x;}
+test('inicialización aislada',()=>{const a=newDraft(),b=newDraft();a.data.services.push('ropa');assert.deepEqual(b.data.services,[]);assert.equal(a.version,1);});
+test('rechaza campos no autorizados',()=>assert.throws(()=>normalize('__proto__','x')));
+test('ediciones inmutables y versionado',()=>{const a=valid(),b=updateDraft(a,'employer','María');assert.equal(a.data.employer,'Ana');assert.equal(b.version,a.version+1);});
+test('listas depuradas contra opciones no válidas',()=>assert.deepEqual(normalize('services',['limpieza','invalido','limpieza']),['limpieza']));
+test('identidad incompleta detectada',()=>assert.ok(validateStep(newDraft().data,1).employer));
+test('otros servicios habilita subcampo',()=>{const v=valid().data;v.services=['otro'];assert.ok(visibleFields(2,v).some(f=>f.key==='otherService'));});
+test('no se exige subcampo cuando no aplica',()=>{const v=valid().data;assert.ok(!visibleFields(2,v).some(f=>f.key==='otherService'));});
+test('fecha imposible rechazada',()=>assert.ok(validateStep({...valid().data,startDate:'2026-02-30'},3).startDate));
+test('fin anterior a inicio rechazado',()=>assert.ok(validateStep({...valid().data,endDate:'2026-01-01'},3).endDate));
+test('jornada fuera de rango rechazada',()=>assert.ok(validateStep({...valid().data,weeklyHours:'170'},3).weeklyHours));
+test('jornada hogar mayor de 40 genera alerta',()=>assert.ok(evaluateRules({...valid().data,weeklyHours:'45'}).some(r=>r.code==='WORKING_TIME')));
+test('presencia elevada produce revisión',()=>assert.ok(evaluateRules({...valid().data,presenceHours:'21'}).some(r=>r.code==='PRESENCE')));
+test('falsa autonomía produce alerta',()=>assert.ok(evaluateRules({...valid().data,mode:'autonomo',direction:'si'}).some(r=>r.code==='CLASSIFICATION')));
+test('jurisdicción fuera de alcance bloqueada',()=>assert.ok(validateStep({...valid().data,jurisdiction:'FR'},0).jurisdiction));
+test('cláusulas abiertamente coactivas se bloquean',()=>assert.ok(validateStep({...valid().data,additional:'retener pasaporte'},6).additional));
+test('documento con datos básicos supera validación estructural',()=>assert.deepEqual(validateAll(valid().data),[]));
+test('progreso de datos entre 0 y 100',()=>assert.ok(completeness(valid().data)<=100));
+test('importación elimina datos fuera de catálogo',()=>{const d=importDraft({data:{worker:'A',debug:'secreto'}});assert.equal(d.data.debug,undefined);});
+test('exportación fuerza estado borrador',()=>{const d=valid();d.status='firmado';assert.equal(JSON.parse(asJSON(d)).status,'borrador');});
+test('exportación TXT incluye advertencia explícita',()=>assert.match(asText(valid()),/NO FIRMABLE/));
+test('exportación HTML neutraliza XSS',()=>{const d=valid();d.data.worker='<img src=x onerror=alert(1)>';assert.ok(asHTML(d).includes('&lt;img'));assert.ok(!renderDocument(d).includes('<img src=x'));});
+test('esquema completo cuenta con ocho etapas',()=>assert.equal(SCHEMA.length,8));
