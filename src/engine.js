@@ -106,7 +106,7 @@ export function validateStep(data,stepIndex){
     if(field.required&&blank(value)){errors[field.key]='Este campo es obligatorio.';continue;}
     if(blank(value))continue;
     if(field.type==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))errors[field.key]='Correo electrónico no válido.';
-    if(field.type==='number'&&(!Number.isFinite(Number(value))||(field.min!==undefined&&Number(value)<field.min)||(field.max!==undefined&&Number(value)>field.max)))errors[field.key]='Importe u horas fuera de rango.';
+    if(field.type==='number'&&(!Number.isFinite(Number(value))||(field.min!==undefined&&Number(value)<field.min)||(field.max!==undefined&&Number(value)>field.max)||(field.step!==undefined&&Math.abs((Number(value)-(field.min??0))/field.step-Math.round((Number(value)-(field.min??0))/field.step))>1e-7)))errors[field.key]='Importe, horas o incremento fuera de rango.';
     if(field.type==='date'&&!dateValid(value))errors[field.key]='Fecha no válida.';
     if(['radio','select'].includes(field.type)&&!field.options.some(o=>o.value===value))errors[field.key]='Selecciona una opción válida.';
     if(field.type==='multi'&&(!Array.isArray(value)||value.some(v=>!field.options.some(o=>o.value===v))))errors[field.key]='Selección no válida.';

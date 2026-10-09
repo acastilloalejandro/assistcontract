@@ -5,18 +5,22 @@ import {encrypt,decrypt,storeCiphertext,loadCiphertext,forgetCiphertext,hasCiphe
 const root=document.getElementById('app');
 const state={draft:newDraft(),step:0,errors:{},openPreview:true,showToast:'',busy:false};
 const steps=SCHEMA;
+const AUTOFILL={employer:'section-employer name',employerEmail:'section-employer email',employerId:'section-employer off',worker:'section-worker name',workerEmail:'section-worker email',workerId:'section-worker off',city:'address-level2',province:'address-level1',workplace:'street-address'};
+const HINTS={employer:'Nombre completo de quien contrata',worker:'Nombre completo de quien presta los servicios',employerEmail:'nombre@ejemplo.es',workerEmail:'nombre@ejemplo.es',city:'Ej. Barcelona',province:'Ej. Barcelona',workplace:'Dirección o lugar acordado'};
 const icon=(kind)=>({file:'▤',lock:'◈',right:'→',left:'←',check:'✓',warning:'!',download:'↓',menu:'☰'}[kind]||kind);
 function fieldMarkup(field){
   const v=state.draft.data[field.key], error=state.errors[field.key];
   const req=field.required?'<span class="required" aria-label="obligatorio">*</span>':'';
   const title=`<span class="field-title">${h(field.label)} ${req}</span>`;
-  const helper=error?`<span class="field-error" id="err-${field.key}">${h(error)}</span>`:'';
+  const helper=error?`<span class="field-error" id="err-${field.key}" role="alert">${h(error)}</span>`:'';
+  const described=error?`aria-describedby="err-${field.key}"`:'';
+  const autofill=AUTOFILL[field.key]||'off';
   let control='';
-  if(field.type==='select')control=`<select id="f-${field.key}" data-field="${field.key}" ${error?'aria-invalid="true"':''}>${field.options.map(o=>`<option value="${h(o.value)}" ${o.value===v?'selected':''}>${h(o.label)}</option>`).join('')}</select>`;
+  if(field.type==='select')control=`<select id="f-${field.key}" data-field="${field.key}" ${described} ${error?'aria-invalid="true"':''}>${field.options.map(o=>`<option value="${h(o.value)}" ${o.value===v?'selected':''}>${h(o.label)}</option>`).join('')}</select>`;
   else if(field.type==='radio')control=`<div class="option-grid" role="radiogroup" aria-label="${h(field.label)}">${field.options.map(o=>`<label class="option"><input type="radio" name="${field.key}" data-field="${field.key}" value="${h(o.value)}" ${v===o.value?'checked':''}><span>${h(o.label)}</span></label>`).join('')}</div>`;
   else if(field.type==='multi')control=`<div class="checkbox-grid">${field.options.map(o=>`<label class="check-item"><input type="checkbox" data-multi="${field.key}" value="${h(o.value)}" ${Array.isArray(v)&&v.includes(o.value)?'checked':''}><span>${h(o.label)}</span></label>`).join('')}</div>`;
-  else if(field.type==='textarea')control=`<textarea id="f-${field.key}" data-field="${field.key}" maxlength="${field.max||1200}" rows="3" placeholder="Especificar cuando proceda" ${error?'aria-invalid="true"':''}>${h(v)}</textarea>`;
-  else control=`<input id="f-${field.key}" data-field="${field.key}" type="${field.type}" value="${h(v)}" autocomplete="off" ${field.max?'maxlength="'+field.max+'"':''} ${field.min!==undefined?'min="'+field.min+'"':''} ${field.max!==undefined&&field.type==='number'?'max="'+field.max+'"':''} ${field.step?'step="'+field.step+'"':''} ${error?'aria-invalid="true"':''} placeholder="${field.type==='date'?'':field.type==='number'?'0': 'Escribe aquí'}">`;
+  else if(field.type==='textarea')control=`<textarea id="f-${field.key}" data-field="${field.key}" maxlength="${field.max||1200}" rows="3" autocomplete="off" placeholder="Especificar cuando proceda" ${error?'aria-invalid="true"':''}>${h(v)}</textarea>`;
+  else control=`<input id="f-${field.key}" data-field="${field.key}" type="${field.type}" value="${h(v)}" autocomplete="${autofill}" ${described} ${field.type==='email'?'inputmode="email" autocapitalize="none"':field.type==='number'?'inputmode="decimal"':'autocapitalize="sentences"'} ${field.max?'maxlength="'+field.max+'"':''} ${field.min!==undefined?'min="'+field.min+'"':''} ${field.max!==undefined&&field.type==='number'?'max="'+field.max+'"':''} ${field.step?'step="'+field.step+'"':''} ${error?'aria-invalid="true"':''} placeholder="${h(HINTS[field.key]|| (field.type==='date'?'':field.type==='number'?'0':'Escribe aquí'))}">`;
   return `<div class="field ${field.type==='textarea'||field.type==='radio'||field.type==='multi'?'field-wide':''}"><label class="field-label" ${['radio','multi'].includes(field.type)?'':'for="f-'+field.key+'"'}>${title}</label>${control}${helper}</div>`;
 }
 function bannerForMode(d){
@@ -33,9 +37,14 @@ function updateProgress(){for(const [selector,content] of [['#hero-percent',comp
 function toast(message){const n=root.querySelector('#toast');n.textContent=message;n.classList.add('visible');clearTimeout(toast.timer);toast.timer=setTimeout(()=>n.classList.remove('visible'),3500);}
 function setField(key,value,conditional=false){state.draft=updateDraft(state.draft,key,value);delete state.errors[key];updateProgress();if(conditional)render();}
 function bind(){
-  root.querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{state.step=Number(button.dataset.step);state.errors={};render();}));
+  root.querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{state.step=Number(button.dataset.step);state.errors={};render();root.querySelector('#content')?.scrollIntoView({block:'start',behavior:'instant'});}));
   root.querySelectorAll('[data-goto]').forEach(button=>button.addEventListener('click',()=>{state.step=Number(button.dataset.goto);state.errors=validateStep(state.draft.data,state.step);render();}));
-  root.querySelectorAll('[data-field]').forEach(input=>input.addEventListener(input.type==='radio'||input.type==='checkbox'||input.tagName==='SELECT'?'change':'input',()=>{const key=input.dataset.field;setField(key,input.value,Boolean(key==='mode'||key==='accommodation'||key==='inKind'));}));
+  root.querySelectorAll('[data-field]').forEach(input=>{
+    const change=()=>{const key=input.dataset.field;setField(key,input.value,['mode','accommodation','inKind'].includes(key));};
+    input.addEventListener(input.type==='radio'||input.tagName==='SELECT'?'change':'input',change);
+    // Autofill can populate controls through change rather than keystrokes.
+    if(input.type!=='radio'&&input.tagName!=='SELECT')input.addEventListener('change',change);
+  });
   root.querySelectorAll('[data-multi]').forEach(input=>input.addEventListener('change',()=>{const key=input.dataset.multi;const values=[...root.querySelectorAll(`[data-multi="${key}"]:checked`)].map(item=>item.value);setField(key,values,true);}));
   root.querySelector('#back').addEventListener('click',()=>{state.step=Math.max(0,state.step-1);state.errors={};render();});
   root.querySelector('#next').addEventListener('click',()=>{if(state.step===7){state.step=0;state.errors={};render();return;}state.errors=validateStep(state.draft.data,state.step);if(Object.keys(state.errors).length){render();root.querySelector('[aria-invalid]')?.focus();toast('Revisa los campos indicados.');return;}state.step++;render();});
