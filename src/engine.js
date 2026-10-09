@@ -90,8 +90,10 @@ export function normalize(key,raw) {
 }
 export function updateDraft(draft,key,value){
   const data={...draft.data,[key]:normalize(key,value)};
+  if(key==='services'&&!data.services.includes('otro'))data.otherService='';
+  if(key==='inKind'&&data.inKind!=='si')data.inKindDetails='';
   if(key==='accommodation'&&data.accommodation!=='si'){data.housing='';data.overnight='no';}
-  if(key==='mode'&&data.mode!=='hogar'){data.presenceHours='';data.inKind='no';data.accommodation='no';data.housing='';data.overnight='no';}
+  if(key==='mode'&&data.mode!=='hogar'){data.presenceHours='';data.inKind='no';data.inKindDetails='';data.accommodation='no';data.housing='';data.overnight='no';}
   return {...draft,data,status:'borrador',version:draft.version+1,updatedAt:new Date().toISOString(),history:[...draft.history.slice(-29),{key,version:draft.version+1,at:new Date().toISOString()}]};
 }
 const blank=v=>Array.isArray(v)?v.length===0:String(v??'').trim()==='';
@@ -112,6 +114,7 @@ export function validateStep(data,stepIndex){
   if(stepIndex===0&&data.jurisdiction!=='ES')errors.jurisdiction='Solo está disponible España.';
   if(stepIndex===3&&dateValid(data.startDate)&&dateValid(data.endDate)&&data.endDate<data.startDate)errors.endDate='No puede ser anterior al inicio.';
   if(stepIndex===6&&/(retener\s+(el\s+)?pasaporte|prohibid[oa]\s+salir|sin\s+descansos|confiscar\s+documentos)/i.test(data.additional))errors.additional='Cláusula potencialmente coactiva no admisible.';
+  if(stepIndex===3&&data.mode==='hogar'&&Number(data.weeklyHours)>40)errors.weeklyHours='Jornada ordinaria superior a 40 horas semanales.';
   return errors;
 }
 export function validateAll(data){return SCHEMA.flatMap((_,step)=>Object.entries(validateStep(data,step)).map(([field,message])=>({step,field,message})));}
@@ -130,4 +133,4 @@ export function evaluateRules(data){
   return alerts;
 }
 export function completeness(data){const total=SCHEMA.slice(0,-1).flatMap((_,i)=>visibleFields(i,data).filter(f=>f.required));const completed=total.filter(f=>!blank(data[f.key]));return Math.round((completed.length/Math.max(1,total.length))*100);}
-export function importDraft(raw){if(!raw||typeof raw!=='object'||!raw.data||typeof raw.data!=='object')throw Error('Archivo de expediente incorrecto.');const result=newDraft();for(const key of Object.keys(FIELD_MAP)){if(Object.hasOwn(raw.data,key))result.data[key]=normalize(key,raw.data[key]);}return result;}
+export function importDraft(raw){if(!raw||typeof raw!=='object'||Array.isArray(raw)||!raw.data||typeof raw.data!=='object'||Array.isArray(raw.data))throw Error('Archivo de expediente incorrecto.');if(raw.schemaVersion!==undefined&&raw.schemaVersion!==2)throw Error('Versión incompatible.');const result=newDraft();for(const key of Object.keys(FIELD_MAP)){if(Object.hasOwn(raw.data,key))result.data[key]=normalize(key,raw.data[key]);}if(!result.data.services.includes('otro'))result.data.otherService='';if(result.data.mode!=='hogar'){result.data.presenceHours='';result.data.inKind='no';result.data.inKindDetails='';result.data.accommodation='no';result.data.housing='';result.data.overnight='no';}if(result.data.inKind!=='si')result.data.inKindDetails='';if(result.data.accommodation!=='si'){result.data.housing='';result.data.overnight='no';}return result;}
