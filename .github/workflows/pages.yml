@@ -25,7 +25,7 @@ jobs:
       - run: npm run verify
       - run: test -f dist/index.html && test -f dist/sw.js && test -f dist/src/main.js
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
       - id: deployment
