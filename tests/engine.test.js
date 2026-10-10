@@ -31,3 +31,6 @@ test('horas deben seguir incrementos de media hora',()=>assert.ok(validateStep({
 test('jornada ordinaria del hogar superior a 40 se rechaza',()=>assert.ok(validateStep({...valid().data,weeklyHours:'41'},3).weeklyHours));
 test('cambio de servicios limpia descripción no aplicable',()=>{let d=valid();d=updateDraft(d,'services',['otro']);d=updateDraft(d,'otherService','Tarea');d=updateDraft(d,'services',['limpieza']);assert.equal(d.data.otherService,'');});
 test('importación elimina datos de alojamiento si no aplica',()=>{const d=importDraft({data:{mode:'autonomo',accommodation:'si',housing:'Texto privado'}});assert.equal(d.data.housing,'');});
+
+test('autocompletado mantiene campos independientes por parte',()=>{const d=updateDraft(updateDraft(valid(),'employerEmail','empleador@example.es'),'workerEmail','trabajador@example.es');assert.equal(d.data.employerEmail,'empleador@example.es');assert.equal(d.data.workerEmail,'trabajador@example.es');});
+test('no se altera modalidad cuando se actualiza nombre',()=>{const d=updateDraft(valid(),'employer','Nuevo nombre');assert.equal(d.data.mode,'hogar');});
