@@ -54,3 +54,7 @@ Los cambios se proponen por pull request. CI debe superar `npm run verify`; las 
 ## Copias portátiles cifradas
 
 En la revisión final puede exportarse `.acenc` con cifrado AES-GCM y contraseña de al menos doce caracteres. Se reimporta mediante «Importar expediente» sin enviar documentos a servidores. El JSON estándar sigue siendo texto sin cifrar: debe manejarse como dato personal sensible. Si se pierde la contraseña de `.acenc`, no existe mecanismo de recuperación. La importación reemplaza el expediente actual solo tras confirmación.
+
+## Catálogo de plantillas y comparación local (3.2)
+
+El editor de servicios ofrece cuatro plantillas de tareas **orientativas, no jurídicas**, reutilizables mediante archivos JSON con formato `assistcontract-services`. La importación solo admite servicios del catálogo, con esquema versionado; no admite expresiones ni código ejecutable. Durante la revisión es posible comparar dos borradores JSON de forma local. La comparación puede exponer datos personales en pantalla, pero no los transmite a servidores.
