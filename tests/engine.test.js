@@ -34,3 +34,6 @@ test('importación elimina datos de alojamiento si no aplica',()=>{const d=impor
 
 test('autocompletado mantiene campos independientes por parte',()=>{const d=updateDraft(updateDraft(valid(),'employerEmail','empleador@example.es'),'workerEmail','trabajador@example.es');assert.equal(d.data.employerEmail,'empleador@example.es');assert.equal(d.data.workerEmail,'trabajador@example.es');});
 test('no se altera modalidad cuando se actualiza nombre',()=>{const d=updateDraft(valid(),'employer','Nuevo nombre');assert.equal(d.data.mode,'hogar');});
+
+test('límite de longitud de campos importados se respeta',()=>{const d=importDraft({data:{employer:'X'.repeat(200)}});assert.equal(d.data.employer.length,140);});
+test('datos de servicios condicionales se eliminan al importar',()=>{const d=importDraft({data:{services:['limpieza'],otherService:'No debe persistir'}});assert.equal(d.data.otherService,'');});
