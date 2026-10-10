@@ -139,7 +139,7 @@ export function qualityReport(data){
   const warnings=evaluateRules(data);
   const filled=completeness(data);
   const blockingWarnings=warnings.filter(w=>w.level==='alerta'||w.level==='bloqueo');
-  const checks={essentialFields:errors.length===0,coherentClassification:!blockingWarnings.some(w=>w.code==='CLASSIFICATION'),workTime:!errors.some(e=>e.field==='weeklyHours'),dateRange:!errors.some(e=>e.field==='endDate'),dataMinimisation:true};
+  const checks={essentialFields:errors.length===0,coherentClassification:!blockingWarnings.some(w=>w.code==='CLASSIFICATION'),workTime:!errors.some(e=>e.field==='weeklyHours'),dateRange:!errors.some(e=>e.field==='endDate'),knownFieldsOnly:Object.keys(data||{}).every(key=>Object.hasOwn(FIELD_MAP,key))};
   return {completeness:filled,validFields:errors.length===0,issues:errors,warnings,checks,needsProfessionalReview:true};
 }
 /** Snapshot contains only whitelisted normalized data and no unencrypted persistence. */
@@ -147,5 +147,5 @@ export function compareDrafts(left,right){
   const a=importDraft(left).data,b=importDraft(right).data;
   return Object.keys(FIELD_MAP).filter(key=>JSON.stringify(a[key])!==JSON.stringify(b[key])).map(key=>({field:key,label:FIELD_MAP[key].label,before:a[key],after:b[key]}));
 }
-export function completeness(data){const total=SCHEMA.slice(0,-1).flatMap((_,i)=>visibleFields(i,data).filter(f=>f.required));const completed=total.filter(f=>!blank(data[f.key]));return Math.round((completed.length/Math.max(1,total.length))*100);}
+export function completeness(data){const required=SCHEMA.slice(0,-1).flatMap((_,i)=>visibleFields(i,data).filter(f=>f.required).map(field=>({field,step:i})));const completed=required.filter(({field,step})=>!blank(data[field.key])&&!validateStep(data,step)[field.key]);return Math.round(completed.length/Math.max(1,required.length)*100);}
 export function importDraft(raw){if(!raw||typeof raw!=='object'||Array.isArray(raw)||!raw.data||typeof raw.data!=='object'||Array.isArray(raw.data))throw Error('Archivo de expediente incorrecto.');if(raw.schemaVersion!==undefined&&![1,2].includes(raw.schemaVersion))throw Error('Versión incompatible.');const result=newDraft();for(const key of Object.keys(FIELD_MAP)){if(Object.hasOwn(raw.data,key))result.data[key]=normalize(key,raw.data[key]);}if(!result.data.services.includes('otro'))result.data.otherService='';if(result.data.mode!=='hogar'){result.data.presenceHours='';result.data.inKind='no';result.data.inKindDetails='';result.data.accommodation='no';result.data.housing='';result.data.overnight='no';}if(result.data.inKind!=='si')result.data.inKindDetails='';if(result.data.accommodation!=='si'){result.data.housing='';result.data.overnight='no';}return result;}
