@@ -1,14 +1,15 @@
 {
   "name": "assistcontract",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "private": true,
   "type": "module",
   "description": "Aplicación web estática y PWA para preparación de borradores contractuales",
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/main.js && node --check src/engine.js && node --check src/documents.js && node --check src/vault.js && node --check sw.js && node --check tests/vault.test.js && node --check src/service-templates.js && node --check tests/service-templates.test.js && node --check src/review-report.js && node --check tests/review-report.test.js",
+    "check": "node --check src/main.js && node --check src/engine.js && node --check src/documents.js && node --check src/vault.js && node --check sw.js && node --check tests/vault.test.js && node --check src/service-templates.js && node --check tests/service-templates.test.js && node --check src/review-report.js && node --check tests/review-report.test.js && node --check scripts/dev-server.mjs && node --check scripts/verify-dist.mjs",
     "build": "node scripts/build.mjs",
-    "verify": "npm run check && npm test && npm run build"
+    "verify": "npm run check && npm test && npm run build && node scripts/verify-dist.mjs",
+    "dev": "npm run build && node scripts/dev-server.mjs"
   },
   "engines": {
     "node": ">=20"
