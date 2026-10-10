@@ -61,3 +61,7 @@ El editor de servicios ofrece cuatro plantillas de tareas **orientativas, no jur
 
 ## Calidad estructural y privacidad (3.3)
 La completitud solo incluye campos obligatorios con valores estructuralmente válidos. Las modificaciones de campos condicionales conservan los valores independientes antes de limpiar los campos ya no aplicables. Las exportaciones HTML, TXT y JSON requieren advertencia explícita por su contenido en claro. El nuevo **Informe técnico** contiene exclusivamente indicadores estructurales, campos que faltan y códigos genéricos de alertas; no contiene identificadores, nombres ni direcciones. No equivale a un dictamen legal ni a una evaluación de cumplimiento normativo.
+
+## Servidor local y verificación de publicación (3.4)
+
+`npm run dev` genera `dist/` y sirve únicamente los archivos compilados en `http://127.0.0.1:4173/` con Node.js, sin instalar dependencias externas. No dispone de recarga automática: reiniciar para reconstruir. `npm run verify` incluye ahora comprobaciones estructurales de referencias HTML, imports JS, manifest, Service Worker e iconos. El flujo de Pages verifica después de desplegar que la web pública entrega `index.html` y el módulo JS más reciente; un deploy no se declara exitoso si esta comprobación falla. Ver `docs/qa-matrix.md` para la matriz de pruebas manuales aún pendientes.

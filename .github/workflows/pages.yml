@@ -30,3 +30,24 @@ jobs:
           path: dist
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verificar sitio público tras el deploy
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${PAGE_URL%/}"
+          if [[ -z "$base" ]]; then exit 1; fi
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error --location --max-time 15 "$base/" -o /tmp/assistcontract-index.html \
+              && grep -q 'src/main.js' /tmp/assistcontract-index.html \
+              && curl --fail --silent --show-error --location --max-time 15 "$base/src/main.js" -o /tmp/assistcontract-main.js \
+              && grep -q 'review-report.js' /tmp/assistcontract-main.js; then
+              echo 'Página y módulo principal publicados correctamente.'
+              exit 0
+            fi
+            echo "Intento $attempt: esperando actualización de GitHub Pages."
+            sleep 10
+          done
+          echo 'El sitio público no sirve la versión esperada.' >&2
+          exit 1
