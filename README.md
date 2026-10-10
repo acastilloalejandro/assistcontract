@@ -50,3 +50,7 @@ Todos los derechos reservados por ahora. No se otorga licencia de explotación n
 ## Automatización
 
 Los cambios se proponen por pull request. CI debe superar `npm run verify`; las fusiones automáticas están limitadas a mantenimiento autorizado y sujetas a las reglas de la rama principal. El despliegue de GitHub Pages se inicia tras cambios en `main`, con verificación independiente necesaria para confirmar disponibilidad pública.
+
+## Copias portátiles cifradas
+
+En la revisión final puede exportarse `.acenc` con cifrado AES-GCM y contraseña de al menos doce caracteres. Se reimporta mediante «Importar expediente» sin enviar documentos a servidores. El JSON estándar sigue siendo texto sin cifrar: debe manejarse como dato personal sensible. Si se pierde la contraseña de `.acenc`, no existe mecanismo de recuperación. La importación reemplaza el expediente actual solo tras confirmación.

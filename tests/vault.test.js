@@ -1,0 +1,11 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {webcrypto} from 'node:crypto';
+import {encrypt,decrypt} from '../src/vault.js';
+import {newDraft,importDraft} from '../src/engine.js';
+const original=globalThis.crypto;
+if(!globalThis.crypto)globalThis.crypto=webcrypto;
+test('copia cifrada se recupera con contraseña correcta',async()=>{const d=newDraft();d.data.employer='Prueba';const encoded=await encrypt(d,'prueba-clave-larga-123');assert.equal(JSON.parse(encoded).format,'AC2');const restored=importDraft(await decrypt(encoded,'prueba-clave-larga-123'));assert.equal(restored.data.employer,'Prueba');assert.ok(!encoded.includes('Prueba'));});
+test('contraseña errónea no descifra contenido',async()=>{const encoded=await encrypt(newDraft(),'clave-correcta-123');await assert.rejects(decrypt(encoded,'clave-incorrecta-456'));});
+test('contraseñas demasiado cortas se rechazan',async()=>await assert.rejects(encrypt(newDraft(),'123'),/12/));
+test('cifrado aleatorio no repite datos idénticos',async()=>{const d=newDraft();const a=await encrypt(d,'clave-correcta-123'),b=await encrypt(d,'clave-correcta-123');assert.notEqual(a,b);});
