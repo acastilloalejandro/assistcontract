@@ -6,10 +6,10 @@ Plataforma web para la elaboración guiada de **borradores orientativos** de acu
 
 ## Funcionalidad MVP
 
-- Asistente de cinco etapas y diseño adaptable para móviles.
+- Asistente de ocho etapas y diseño adaptable para móviles.
 - Clasificación inicial entre empleo doméstico y prestación verdaderamente autónoma.
 - Selección inteligente de actividades, comprobación básica de campos y resumen.
-- Exportación local de borrador `.txt` sin almacenar datos personales en un servidor.
+- Exportación local de borrador `.txt`, `.html` y `.json` sin almacenar datos personales en un servidor.
 - Interfaz en español, sin rastreadores ni claves de API.
 
 ## Ejecutar
@@ -33,7 +33,7 @@ El sitio compilado se encuentra en `dist/` y puede publicarse como aplicación e
 2. Catálogo validado de cláusulas y exportación PDF/DOCX.
 3. Revisión humana antes de firma; integración de proveedor de firma electrónica.
 4. Backend con autenticación, control de acceso, cifrado, registros de auditoría y política de retención.
-5. Tests automatizados (unitarios, accesibilidad, E2E, seguridad) y revisión jurídica profesional.
+5. Pruebas automatizadas adicionales (accesibilidad, E2E, seguridad) y revisión jurídica profesional.
 
 ## Importante
 
@@ -42,3 +42,11 @@ La contratación laboral del hogar, la asistencia personal y los servicios autó
 ## Licencia
 
 Todos los derechos reservados por ahora. No se otorga licencia de explotación ni de redistribución del código sin autorización escrita del titular de derechos. Un repositorio público permite examinar su código, pero no implica que sea software de código abierto.
+
+## Indicadores de calidad estructural
+
+`qualityReport(data)` informa sobre campos incompletos, coherencia básica, fechas y alertas trazables. **No certifica validez legal**. `compareDrafts(left,right)` permite comparar datos normalizados y `importDraft` admite migración limitada del esquema v1 al actual, descartando campos no reconocidos. El motor sigue siendo local y no envía datos de expedientes a servidores.
+
+## Automatización
+
+Los cambios se proponen por pull request. CI debe superar `npm run verify`; las fusiones automáticas están limitadas a mantenimiento autorizado y sujetas a las reglas de la rama principal. El despliegue de GitHub Pages se inicia tras cambios en `main`, con verificación independiente necesaria para confirmar disponibilidad pública.
