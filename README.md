@@ -58,3 +58,6 @@ En la revisión final puede exportarse `.acenc` con cifrado AES-GCM y contraseñ
 ## Catálogo de plantillas y comparación local (3.2)
 
 El editor de servicios ofrece cuatro plantillas de tareas **orientativas, no jurídicas**, reutilizables mediante archivos JSON con formato `assistcontract-services`. La importación solo admite servicios del catálogo, con esquema versionado; no admite expresiones ni código ejecutable. Durante la revisión es posible comparar dos borradores JSON de forma local. La comparación puede exponer datos personales en pantalla, pero no los transmite a servidores.
+
+## Calidad estructural y privacidad (3.3)
+La completitud solo incluye campos obligatorios con valores estructuralmente válidos. Las modificaciones de campos condicionales conservan los valores independientes antes de limpiar los campos ya no aplicables. Las exportaciones HTML, TXT y JSON requieren advertencia explícita por su contenido en claro. El nuevo **Informe técnico** contiene exclusivamente indicadores estructurales, campos que faltan y códigos genéricos de alertas; no contiene identificadores, nombres ni direcciones. No equivale a un dictamen legal ni a una evaluación de cumplimiento normativo.
