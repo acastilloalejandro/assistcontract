@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {newDraft,normalize,updateDraft,validateStep,validateAll,evaluateRules,completeness,importDraft,visibleFields,SCHEMA} from '../src/engine.js';
+import {newDraft,normalize,updateDraft,validateStep,validateAll,evaluateRules,completeness,importDraft,visibleFields,SCHEMA,qualityReport,compareDrafts} from '../src/engine.js';
 import {asJSON,asHTML,asText,renderDocument} from '../src/documents.js';
 function valid(){const x=newDraft();Object.assign(x.data,{employer:'Ana',worker:'Luis',city:'Barcelona',services:['limpieza'],weeklyHours:'30',startDate:'2026-10-10',schedule:'Lunes a viernes',rest:'Sábado y domingo',grossPay:'1300',payPeriod:'mes',payment:'Transferencia',workplace:'Barcelona'});return x;}
 test('inicialización aislada',()=>{const a=newDraft(),b=newDraft();a.data.services.push('ropa');assert.deepEqual(b.data.services,[]);assert.equal(a.version,1);});
@@ -37,3 +37,8 @@ test('no se altera modalidad cuando se actualiza nombre',()=>{const d=updateDraf
 
 test('límite de longitud de campos importados se respeta',()=>{const d=importDraft({data:{employer:'X'.repeat(200)}});assert.equal(d.data.employer.length,140);});
 test('datos de servicios condicionales se eliminan al importar',()=>{const d=importDraft({data:{services:['limpieza'],otherService:'No debe persistir'}});assert.equal(d.data.otherService,'');});
+
+test('informe de calidad no confunde completitud con revisión legal',()=>{const x=valid().data;const r=qualityReport(x);assert.equal(r.issues.length,0);assert.equal(r.needsProfessionalReview,true);});
+test('comparador de borradores identifica únicamente los cambios',()=>{const a=valid(),b=updateDraft(a,'city','Madrid');const diff=compareDrafts(a,b);assert.deepEqual(diff.map(d=>d.field),['city']);});
+test('migración de esquema previo elimina datos externos',()=>{const d=importDraft({schemaVersion:1,data:{employer:'Ana',secreto:'no autorizado'}});assert.equal(d.data.employer,'Ana');assert.equal(d.data.secreto,undefined);});
+test('formatos futuros desconocidos se rechazan',()=>assert.throws(()=>importDraft({schemaVersion:999,data:{}})));

@@ -1,5 +1,5 @@
 /* Caches only public static code, never contractual information. */
-const CACHE='assistcontract-shell-v2.2', PREFIX='assistcontract-shell-';
+const CACHE='assistcontract-shell-v3', PREFIX='assistcontract-shell-';
 const SHELL=['./','./index.html','./src/main.js','./src/style.css','./src/engine.js','./src/documents.js','./src/vault.js','./manifest.webmanifest','./icon.svg','./favicon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith(PREFIX)&&name!==CACHE).map(name=>caches.delete(name)))).then(()=>self.clients.claim())));
